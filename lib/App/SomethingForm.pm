@@ -1,12 +1,14 @@
 package App::SomethingForm;
 
+# ABSTRACT: Dancer app that receives data from HTML forms and emails it
+
+# VERSION
+
 use utf8;
 
 use Dancer2;
 use Dancer2::Plugin::Email;
 use Encode qw(decode encode);
-
-our $VERSION = '0.1';
 
 get '/' => sub {
     template 'index';
