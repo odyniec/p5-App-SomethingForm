@@ -25,6 +25,21 @@ post '/somethingform' => sub {
 
     my $data = from_json(request->body);
 
+    # $data is an array of hashes that represent fieldsets, each containing an
+    # array of hashes representing fields, e.g.:
+    #
+    # [
+    #     {
+    #         'Personal information' => [
+    #             { name => 'First name', value => 'Mikey' },
+    #             { name => 'Last name', value => 'Walsh' }
+    #         ],
+    #         'Contact' => [
+    #             { name => 'E-mail address', value => 'mikey@example.com' }
+    #         ]
+    #     }
+    # ]
+
     if (my $form_id = get_value($data, 'somethingform_form_id')) {
         $config = { %$config, %{ config->{forms}{$form_id} } };
     }
