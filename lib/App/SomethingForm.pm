@@ -23,9 +23,9 @@ post '/somethingform' => sub {
 
     my $config = config;
 
-    $data = from_json(request->body);
+    my $data = from_json(request->body);
 
-    if (my $form_id = get_field($data, 'somethingform_form_id')) {
+    if (my $form_id = get_value($data, 'somethingform_form_id')) {
         $config = { %$config, %{ config->{forms}{$form_id} } };
     }
 
@@ -51,7 +51,7 @@ post '/somethingform' => sub {
 
     my $subject = Encode::encode("MIME-Q",
         replace_fields($config->{notification_subject} //
-            'New message from %somethingform_form_id% form'));
+            'New message from %somethingform_form_id% form', $data));
 
     email {
         from    => $config->{notification_from},
@@ -64,28 +64,22 @@ post '/somethingform' => sub {
     return to_json({ msg => 'Message sent' });
 };
 
-{
-    my $data_by_key;
+sub get_value {
+    my ($data, $name) = @_;
 
-    sub get_field {
-        my ($data, $name) = @_;
+    my ($item) = grep { $_->{name} eq $name }
+        map { @$_ } map { values %$_ } @$data;
 
-        $data_by_key //= {
-            map { $_->{name} => $_->{value} }
-                map { @$_ }
-                    map { values %$_ } @$data
-        };
+    return $item->{value} if defined $item;
+    return;
+}
 
-        return exists $data_by_key->{$name} ? $data_by_key->{$name} : undef;
-    }
+sub replace_fields {
+    my ($text, $data) = @_;
 
-    sub replace_fields {
-        my ($text) = @_;
+    $text =~ s/%([^%]+)%/get_value($data, $1) || ''/egms;
 
-        $text =~ s/%([^%]+)%/$data_by_key->{$1} || ''/egms;
-
-        return $text;
-    }
+    return $text;
 }
 
 true;
