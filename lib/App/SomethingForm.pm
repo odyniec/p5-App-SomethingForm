@@ -79,6 +79,25 @@ post '/somethingform' => sub {
     return to_json({ msg => 'Message sent' });
 };
 
+post '/somethingform/setup' => sub {
+    content_type 'application/json';
+
+    header 'access-control-allow-origin' => '*';
+
+    my $data = from_json(request->body);
+
+    my $form_signature = App::SomethingForm::Utils::form_signature(
+        $data->{form_spec}, config->{somethingform}{secret_key});
+
+    my $form_metadata = encrypt_form_metadata($data->{form_metadata},
+        config->{somethingform}{secret_key});
+
+    return to_json({
+        form_signature  => $form_signature,
+        form_metadata   => $form_metadata
+    });
+};
+
 sub get_value {
     my ($data, $name) = @_;
 
