@@ -2,6 +2,40 @@
 
 if (!$ && jQuery) $ = jQuery;
 
+window.SomethingForm = {};
+window.SomethingForm.formSpec = function (form) {
+    var $fields = $('button,input,select,textarea', form);
+    var spec = {};
+
+    $fields.each(function (i) {
+        if ($(this).is('button')) {
+            if ($(this).attr('type') !== 'submit')
+                return;
+        }
+
+        var name = $(this).attr('name');
+
+        // Ignore unnamed controls
+        if (name === undefined) return;
+        // Ignore form signature
+        if (name == 'somethingform_signature') return;
+        // Ignore form metadata
+        if (name == 'somethingform_metadata') return;
+
+        spec[name] = {};
+
+        if ($(this).is('input')) {
+            //if ($(this).attr('type'))
+
+            spec[name]['type'] = $(this).attr('type');
+        }
+
+        spec[name]['required'] = this.hasAttribute('required');
+    });
+
+    return spec;
+}
+
 $.extend($.fn, {
     somethingform: function (options) {
         if (!options) options = {};
