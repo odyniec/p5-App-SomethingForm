@@ -10,13 +10,13 @@ use Dancer2;
 use Dancer2::Plugin::Email;
 use Encode qw(decode encode);
 
+use App::SomethingForm::Utils qw( decrypt_form_metadata encrypt_form_metadata );
+
 get '/' => sub {
     template 'index';
 };
 
 post '/somethingform' => sub {
-    my $data = params;
-
     content_type 'application/json';
 
     header 'access-control-allow-origin' => '*';
@@ -40,6 +40,26 @@ post '/somethingform' => sub {
     #     }
     # ]
 
+    my $metadata = {};
+    my $metadata_encrypted = get_value($data, 'somethingform_metadata');
+
+    if (defined $metadata_encrypted) {
+        $metadata = decrypt_form_metadata($metadata_encrypted,
+            config->{somethingform}{secret_key});
+    }
+
+    my $signature = get_value($data, 'somethingform_signature');
+
+    my $form_spec = get_value($data, 'somethingform_spec');
+
+    if ($signature ne App::SomethingForm::Utils::form_signature(
+        $form_spec, config->{somethingform}{secret_key}))
+    {
+        # Signature mismatch -- client was probably tampering with form data
+        status '400';
+        return;
+    }
+
     if (my $form_id = get_value($data, 'somethingform_form_id')) {
         $config = { %$config, %{ config->{forms}{$form_id} } };
     }
@@ -52,11 +72,15 @@ post '/somethingform' => sub {
 
         my ($name, $fields) = each %$fieldset;
 
+        # Omit metadata
+        next if $name eq '_';
+
         if ($name =~ /\S/) {
             $part .= "$name\n" . ('-' x length $name) . "\n";
         }
 
         map { $part .= "$_->{name}: $_->{value}\n" }
+            # Ignore special "somethingform_*" parameters
             grep { $_->{name} !~ /^somethingform_/ } @$fields;
 
         if ($part =~ /./) {
@@ -68,9 +92,12 @@ post '/somethingform' => sub {
         replace_fields($config->{notification_subject} //
             'New message from %somethingform_form_id% form', $data));
 
+    my $notification_to =
+        $metadata->{notification_to} // $config->{notification_to};
+
     email {
-        from    => $config->{notification_from},
-        to      => $config->{notification_to},
+        from    => config->{somethingform}{notification_from},
+        to      => $notification_to,
         subject => $subject,
         body    => encode('UTF-8', $notification_text),
     };
