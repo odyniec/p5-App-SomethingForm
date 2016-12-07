@@ -40,7 +40,8 @@ $.extend($.fn, {
     somethingform: function (options) {
         if (!options) options = {};
     
-        $(this).on('submit', function (event) {
+        /* Add a submit event handler to each form */
+        $(this).filter('form').on('submit', function (event) {
             var form = this;
             var fieldsetNames = {};
 
