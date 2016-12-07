@@ -61,6 +61,13 @@ $.extend($.fn, {
             });
 
             var serializedData = $(form).serializeArray();
+            
+            serializedData[serializedData.length] = {
+                name: 'somethingform_spec',
+                value: JSON.stringify(SomethingForm.formSpec(form))
+            };
+            fieldsetNames['somethingform_spec'] = '_';
+
             var data = [];
 
             $.each(serializedData, function (i, field) {
