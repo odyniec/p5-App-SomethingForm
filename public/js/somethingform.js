@@ -47,17 +47,24 @@ $.extend($.fn, {
 
             /* Map field names to containing fieldset names */
             $('input, textarea', form).map(function () {
-                fieldsetNames[$(this).attr('name')] =
-                    $(this).closest('fieldset', form).attr('name') ||
-                    /* If the fieldset has no name, try <legend> */
-                    $(this).closest('fieldset', form).find('legend').text();
+                var name = $(this).attr('name');
+
+                if (name === undefined) return;
+
+                if (name.match(/^somethingform_/))
+                    fieldsetNames[name] = '_';
+                else
+                    fieldsetNames[name] =
+                        $(this).closest('fieldset', form).attr('name') ||
+                        /* If the fieldset has no name, try <legend> */
+                        $(this).closest('fieldset', form).find('legend').text();
             });
 
             var serializedData = $(form).serializeArray();
             var data = [];
 
             $.each(serializedData, function (i, field) {
-                var fieldsetName = fieldsetNames[field['name']]
+                var fieldsetName = fieldsetNames[field['name']];
 
                 /* Is this the first time that this fieldset appears? */
                 if (!data.length || data[data.length-1][fieldsetName] === undefined) {
