@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono|Lato&amp;subset=latin-ext" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+    <script type="text/javascript" src="js/somethingform.js"></script>
+    <script>
+        $(function () {
+            $('button').click(function () {
+                $('#dummy').html($('[name="form_html"]').val());
+
+                var data = {
+                    form_spec: JSON.stringify(SomethingForm.formSpec($('form', '#dummy'))),
+                    form_metadata: {
+                        name: $('[name="form_name"]').val(),
+                        notification_to:
+                            $('[name="notification_to"]').val()
+                    }
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/somethingform/setup',
+                    data: JSON.stringify(data),
+                    contentType: 'text/plain',
+                    dataType: 'json',
+                    success: function (resp) {
+                        $('textarea#output').val(
+                            '<input type="hidden" ' +
+                                'name="somethingform_signature" value="' +
+                                resp['form_signature'] + '">' + "\n" +
+                            '<input type="hidden" ' +
+                                'name="somethingform_metadata" value="' +
+                                resp['form_metadata'] + '">'
+                        );
+                    }
+                })
+            });
+        });
+    </script>
+    <style type="text/css">
+      body {
+        color: #222;
+        font-family: Lato, sans-serif;
+      }
+
+      h1 {
+        border-bottom: solid 0.1em #eee;
+      }
+
+      code {
+        color: #444;
+        font-family: 'Roboto Mono', monospace;
+      }
+
+      input, textarea {
+        border-color: #555;
+        border-radius: 0.2em;
+        border-width: 1px;
+        color: #444;
+      }
+
+      input {
+        font-family: Lato, sans-serif;
+        font-size: 100%;
+        width: 18em;
+      }
+
+      textarea {
+        font-family: 'Roboto Mono', monospace;
+        width: 100%;
+      }
+
+      label {
+        display: block;
+        padding: 0.4em 0;
+      }
+
+      label span {
+        display: block;
+        float: left;
+        width: 14em;
+      }
+
+      button {
+        background: #447ee2;
+        border-left-color: #649eff;
+        border-top-color: #649eff;
+        border-right-color: #245ec2;
+        border-bottom-color: #245ec2;
+        border-radius: 0.2em;
+        border-width: 0.1em;
+        color: #fff;
+        font-size: larger;
+        padding: 0.4em 0.8em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SomethingForm</h1>
+    <p>
+      Form HTML source (including the opening/closing
+      <code>&lt;form&gt;</code> and <code>&lt;/form&gt;</code> tags):
+    </p>
+    <p>
+      <textarea name="form_html" rows="14"></textarea>
+    </p>
+    <p>
+      <label>
+        <span>Form name:</span>
+        <input type="text" name="form_name">
+      </label>
+      <label>
+        <span>Notification e-mail address:</span>
+        <input type="email" name="notification_to">
+      </label>
+    </p>
+    <p style="text-align: center;">
+      <button>Do Complex Calculations</button>
+    </p>
+    <p>
+      Hidden <code>&lt;input&gt;</code> elements to be added to form:
+    </p>
+    <p>
+      <textarea id="output" rows="6"></textarea>
+    </p>
+    <div id="dummy" style="display: none;"></div>
+  </body>
+</html>
