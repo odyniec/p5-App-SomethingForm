@@ -26,3 +26,12 @@ template: "simple"
 #     template_toolkit:
 #       start_tag: '<%'
 #       end_tag:   '%>'
+
+engine:
+  serializer:
+    JSON:
+      canonical: 1
+
+# somethingform:
+#   notification_from: sender@example.com
+#   secret_key: abcde12345
