@@ -89,12 +89,13 @@ post '/somethingform' => sub {
     }
 
     my $subject = $config->{notification_subject} //
-            'New message from %somethingform_form_name% form';
-    $subject = replace_fields($subject, {
-        somethingform_form_name => $metadata->{form_name} //
-            get_value($data, 'somethingform_form_id'),
-        %$data,
-    });
+        'New message from %somethingform_form_name% form';
+
+    my $form_name = $metadata->{form_name} //
+        get_value($data, 'somethingform_form_id');
+    $subject =~ s/%somethingform_form_name%/$form_name/g;
+
+    $subject = replace_fields($subject, $data);
     $subject = Encode::encode("MIME-Q", $subject);
 
     my $notification_to =
