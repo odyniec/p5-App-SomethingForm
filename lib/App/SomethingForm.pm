@@ -91,7 +91,7 @@ post '/somethingform' => sub {
     my $subject = $config->{notification_subject} //
         'New message from %somethingform_form_name% form';
 
-    my $form_name = $metadata->{form_name} //
+    my $form_name = $metadata->{name} //
         get_value($data, 'somethingform_form_id');
     $subject =~ s/%somethingform_form_name%/$form_name/g;
 
