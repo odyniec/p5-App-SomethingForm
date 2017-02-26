@@ -92,7 +92,7 @@ post '/somethingform' => sub {
             'New message from %somethingform_form_name% form';
     $subject = replace_fields($subject, {
         somethingform_form_name => $metadata->{form_name} //
-            get_value($data, 'somethingform_form_id')
+            get_value($data, 'somethingform_form_id'),
         %$data,
     });
     $subject = Encode::encode("MIME-Q", $subject);
