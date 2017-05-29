@@ -6,6 +6,7 @@ use warnings;
 use Crypt::CBC;
 use Crypt::Cipher::AES;
 use Crypt::Mac::HMAC;
+use Encode qw(encode_utf8);
 use JSON::MaybeXS;
 use MIME::Base64;
  
@@ -45,7 +46,7 @@ sub form_signature {
     my $json = JSON::MaybeXS->new({ canonical => 1 });
     $form_spec_json = $json->encode($json->decode($form_spec_json));
 
-    return Crypt::Mac::HMAC::hmac_b64('SHA256', $key, $form_spec_json);
+    return Crypt::Mac::HMAC::hmac_b64('SHA256', $key, encode_utf8($form_spec_json));
 }
 
 =func encrypt_form_metadata
