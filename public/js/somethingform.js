@@ -28,6 +28,9 @@ window.SomethingForm.formSpec = function (form) {
             //if ($(this).attr('type'))
 
             spec[name]['type'] = $(this).attr('type');
+
+            if (this.hasAttribute('pattern'))
+                spec[name]['pattern'] = $(this).attr('pattern');
         }
 
         spec[name]['required'] = this.hasAttribute('required');
